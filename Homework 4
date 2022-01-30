@@ -1,0 +1,72 @@
+productivity <- read.csv("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%2016%20Data%20Sets/CH16PR07.txt", header=FALSE, sep="", col.names=c("improvement","classification","sample"))
+
+attach(productivity)
+classification = factor(classification)
+
+# Graphical Summaries that Test Residual conditions to be able to perform ANOVA model.
+
+library(ggplot2)
+#Density plot by factor (overlapping)
+ggplot(data=productivity, aes(x = improvement, fill = as.factor(classification))) + 
+  labs(fill = "Groups\n")+
+  geom_density(alpha = 0.15)+labs(title = "Density plot with multiple groups")+theme_bw()
+
+#Density 3 separate density plots
+ggplot(data=productivity,aes(x = improvement, fill = as.factor(classification))) +
+  labs(fill = "Groups\n")+
+  geom_density(alpha=0.15)  +
+  facet_grid(as.factor(classification) ~ .)+theme_bw()
+
+#histogram
+ggplot(productivity,aes(x=improvement,fill=as.factor(classification)))+geom_histogram( position = "identity", bins = 10,show.legend = TRUE, alpha=0.5)+labs(fill = "Groups\n") 
+
+
+#Checking normality with QQ-plot of all 3 factors
+library(qqplotr)
+ggplot(data = productivity, mapping = aes(sample = improvement, fill = as.factor(classification)))+
+  labs(fill = "Groups\n")+
+  stat_qq_band(alpha=0.15) +stat_qq_line(alpha=0.15) +stat_qq_point(size=0.5) + facet_wrap(~ as.factor(classification)) +labs(title = "Normal Q-Q plot", x = "Theoretical Quantiles", y = "Sample Quantiles")+theme_bw()
+
+#Shapiro-Wilk Test for Normality
+library(RVAideMemoire)
+byf.shapiro(improvement~as.factor(classification),data=productivity)
+
+#Checking Independence using Runs Test 
+library(randtests)
+runs.test(improvement[1:9])
+runs.test(improvement[10:18])
+runs.test(improvement[19:27])
+
+#Residual plot
+aov1<-aov(improvement~classification,data=productivity)
+re1<-rstudent(aov1)
+ggplot(productivity,aes(y=re1,x=as.factor(classification)))+geom_point(pch=8)+labs(x="Order",y="studentized res.",main="Factor Levels")+
+geom_hline(yintercept=0)
+
+#Checking Homoscedasticity using  Dot Plot:
+ggplot(productivity,aes(y=improvement,x=as.factor(classification)))+geom_boxplot()+labs(x="Groups",title="Productivity Boxplot by Factor")+theme(plot.title=element_text(hjust=0.5))+coord_flip()
+
+#Checking Homoscedasticity using Breusch-Pagan Test,Levene's Test, and Brown-Forsythe Test
+library(car)
+ncvTest(lm(improvement~classification,data=productivity)) #Breusch-Pagan test
+leveneTest(improvement~as.factor(classification),data=productivity) #Levene Test
+
+library(onewaytests)
+bf.test(improvement~as.factor(classification),data=productivity) #Brown-Forsythe Test
+
+##Checking for outliers
+# X Observations
+h <- hatvalues(aov1)
+n<-length(re1)
+h[which(h > 2*5/n)]
+
+# Y observations
+re1[which(abs(re1)>= abs(qt(0.05/n,aov1$df.residual)))]
+
+#Influential Cases
+##DFFITS
+df_classification = length(levels(classification))-1
+dffits(aov1)[which(dffits(aov1)>2*sqrt(df_classification/n))]
+
+#Cooks Distance
+cd<-cooks.distance(aov1)
