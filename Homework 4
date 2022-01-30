@@ -1,6 +1,11 @@
+#Reading in Data (Data from Exercise 18.4)
+
 productivity <- read.csv("http://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%2016%20Data%20Sets/CH16PR07.txt", header=FALSE, sep="", col.names=c("improvement","classification","sample"))
 
+#attaching variables
 attach(productivity)
+
+#Making the variable classification a factor(categorical)
 classification = factor(classification)
 
 # Graphical Summaries that Test Residual conditions to be able to perform ANOVA model.
