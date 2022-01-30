@@ -75,3 +75,9 @@ dffits(aov1)[which(dffits(aov1)>2*sqrt(df_classification/n))]
 
 #Cooks Distance
 cd<-cooks.distance(aov1)
+
+
+# Aligned Dot Plot
+# Remedial Measures
+
+
