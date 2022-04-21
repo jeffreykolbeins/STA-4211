@@ -1,0 +1,22 @@
+## Inputing Dataset and factoring split plot within whole plot
+wheat<-read.csv("https://users.stat.ufl.edu/~rrandles/sta4210/Rclassnotes/data/textdatasets/KutnerData/Chapter%2027%20Data%20Sets/CH27PR20.txt",sep="",header=FALSE,
+                      col.names=c("yield","field","irrigation","fertilizer"))
+within(wheat,fertilizerF<-factor(fertilizer))
+
+library(lattice)  
+library(car)
+
+##split plot visualization
+with(wheat, xyplot(yield ~ fertilizerF | field, groups = replicate))
+with(wheat, xyplot(yield ~ fertilizerF | irrigation, groups = field))
+
+##split plot model
+mod.split.plot <- aov(yield ~ irrigation * fertilizerF + Error(field:irrigation), data = wheat)
+##ANOVA split plot model
+summary(mod.split.plot
+
+##interaction plot
+with(wheat, xyplot(yield ~ fertilizerF | irrigation, groups =field , aspect = "xy",type = "a"))
+
+## Testing interaction
+
